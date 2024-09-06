@@ -1,7 +1,8 @@
+import { Socket } from "socket.io";
 import User from "./User";
 
 export default class Game {
-    private players: User[];
+    players: User[];
     private currentDrawerIndex: number;
     private words: string[];
     private currentWord: string;
@@ -9,8 +10,8 @@ export default class Game {
     private roundTime: number;
     private gameStarted: boolean;
 
-    constructor(players: User[], maxRounds: number = 3, roundTime: number = 60) {
-        this.players = players;
+    constructor(roundTime: number = 60) {
+        this.players = [];
         this.currentDrawerIndex = 0; // Start with the first player
         this.words = this.generateWords(); // Generate an array of 50 random words
         this.currentWord = '';
@@ -29,6 +30,16 @@ export default class Game {
         ];
 
         return wordList.sort(() => Math.random() - 0.5); // Shuffle the words array
+    }
+
+    addPlayer(player : User){
+        if(this.players.length < 6 && !this.gameStarted){
+            this.players.push(player)
+        }
+    }
+
+    removePlayer(socket: Socket) {
+        this.players = this.players.filter(player => player.userSocket !== socket);
     }
 
     start() {
@@ -53,7 +64,8 @@ export default class Game {
     private assignDrawer() {
         this.currentDrawerIndex = this.round % this.players.length;
         const currentDrawer = this.players[this.currentDrawerIndex];
-
+        console.log("current user is : " + currentDrawer.userName);
+        
         // Notify all players about the new drawer
         this.players.forEach(player => {
             player.userSocket.emit('newDrawer', currentDrawer.userSocket.id);
@@ -63,7 +75,8 @@ export default class Game {
     private sendWordToDrawer() {
         this.currentWord = this.words[Math.floor(Math.random() * this.words.length)];
         const currentDrawer = this.players[this.currentDrawerIndex];
-
+        console.log("your word is " + this.currentWord);
+        
         currentDrawer.userSocket.emit('word', this.currentWord);
     }
 
