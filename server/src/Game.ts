@@ -38,8 +38,18 @@ export default class Game {
         }
     }
 
+    hasPlayer(user:User){
+        return this.players.some(player => player.userSocket.id === user.userSocket.id)
+    }
+
     removePlayer(socket: Socket) {
         this.players = this.players.filter(player => player.userSocket !== socket);
+    }
+
+    isGameStarted(){
+        this.players.forEach((player) => {
+            player.userSocket.emit("gameStart",this.gameStarted)
+        })
     }
 
     start() {
@@ -47,6 +57,7 @@ export default class Game {
         console.log("game started");
         
         this.gameStarted = true;
+        this.isGameStarted();
         this.startRound();
     }
 
@@ -55,7 +66,6 @@ export default class Game {
             this.endGame();
             return;
         }
-
         this.assignDrawer();
         this.sendWordToDrawer();
         this.startRoundTimer();

@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { socket } from "../socket";
+import { useNavigate } from "react-router-dom";
 
 const StartPage = () => {
+  const navigate = useNavigate();
   const [playerName, setPlayerName] = useState("");
 
   const startGame = (e: any) => {
     e.preventDefault();
     socket.emit("message", { type: "init_game" }, playerName);
     console.log("Game started with player:", playerName);
+    navigate("/game");
   };
 
   return (

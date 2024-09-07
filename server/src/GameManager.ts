@@ -37,6 +37,19 @@ export default class GameManager {
     }
 
     addToPendingGame(user: User) {
+        // Check if the user is already in the pending game
+        if (this.pendingGame && this.pendingGame.hasPlayer(user)) {
+            console.log(`User ${user.userName} is already in the pending game.`);
+            return;
+        }
+
+        // Check if the user is already in an active game
+        const activeGame = this.games.find(game => game.hasPlayer(user));
+        if (activeGame) {
+            console.log(`User ${user.userName} is already in an active game.`);
+            return;
+        }
+
         if (!this.pendingGame) {
             this.pendingGame = new Game();
         }
@@ -45,9 +58,10 @@ export default class GameManager {
 
         if (this.pendingGame.players.length >= 5) {
             this.startGame(this.pendingGame);
-            this.pendingGame = null; // Reset pendingGame for next set of players
+            this.pendingGame = null; // Reset pendingGame for the next set of players
         }
     }
+
 
     startGame(game: Game) {
         this.games.push(game);
@@ -62,7 +76,8 @@ export default class GameManager {
             if (message.type === INIT_GAME) {
                 user.addUserName(playerName)
                 this.addToPendingGame(user)
-                console.log(this.pendingGame);            
+                console.log(this.pendingGame);
+                this.pendingGame?.isGameStarted()            
             }
         });
     }

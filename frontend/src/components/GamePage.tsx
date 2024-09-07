@@ -1,51 +1,63 @@
-import Canvas from "./Canvas"
-import ChatMessage from "./ui/ChatMessage"
-import UserCard from "./ui/UserCard"
+import { useState } from "react";
+import { socket } from "../socket";
+import Canvas from "./Canvas";
+import ChatMessage from "./ui/ChatMessage";
+import UserCard from "./ui/UserCard";
+import Spinner from "./ui/Spinner";
 
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/diDGkAmxGJC
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
 export default function GamePage() {
+  const [isGameStarted, setIsGameStarted] = useState(false);
 
-    const users = [
-        { name: "M3lee", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-        { name: "moon", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-        { name: "Ghost", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-        { name: "ayush (You)", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-        {
-          name: "Daddy",
-          points: 0,
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-        { name: "Shrota", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-        { name: "Krish", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-      ]
+  const users = [
+    { name: "M3lee", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
+    { name: "moon", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
+    { name: "Ghost", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
+    {
+      name: "ayush (You)",
+      points: 0,
+      avatar: "/placeholder.svg?height=40&width=40",
+    },
+    {
+      name: "Daddy",
+      points: 0,
+      avatar: "/placeholder.svg?height=40&width=40",
+    },
+    {
+      name: "Shrota",
+      points: 0,
+      avatar: "/placeholder.svg?height=40&width=40",
+    },
+    { name: "Krish", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
+  ];
 
-      const chats = [
-        { message: "Krish joined the room!", type: "join" },
-        { message: "sapna joined the room!", type: "join" },
-        { message: "sapna left the room!", type: "leave" },
-        { message: "Ghost: vegeta", type: "chat" },
-        {
-          message: "Mia joined the room!",
-          type: "join",
-        },
-        {
-          message: "Mia left the room!",
-          type: "leave",
-        },
-        {
-          message: "Ghost: ani",
-          type: "chat",
-        },
-        { message: "Krish: boy", type: "chat" },
-        { message: "Ghost: ani", type: "chat" },
-        { message: "CHALU PANDEY joined the room!", type: "join" },
-        { message: "CHALU PANDEY left the room!", type: "leave" },
-      ]
+  const chats = [
+    { message: "Krish joined the room!", type: "join" },
+    { message: "sapna joined the room!", type: "join" },
+    { message: "sapna left the room!", type: "leave" },
+    { message: "Ghost: vegeta", type: "chat" },
+    {
+      message: "Mia joined the room!",
+      type: "join",
+    },
+    {
+      message: "Mia left the room!",
+      type: "leave",
+    },
+    {
+      message: "Ghost: ani",
+      type: "chat",
+    },
+    { message: "Krish: boy", type: "chat" },
+    { message: "Ghost: ani", type: "chat" },
+    { message: "CHALU PANDEY joined the room!", type: "join" },
+    { message: "CHALU PANDEY left the room!", type: "leave" },
+  ];
 
+  socket.on("gameStart", (data) => {
+    setIsGameStarted(data);
+  });
+
+  if (isGameStarted) {
     return (
       <div className="flex h-screen">
         <div className="w-[250px] bg-gray-100 p-4">
@@ -55,7 +67,11 @@ export default function GamePage() {
           </div>
           <div className="mt-4 space-y-2">
             {users.map((player, index) => (
-                <UserCard index={index} name={player.name} points={player.points}/>
+              <UserCard
+                index={index}
+                name={player.name}
+                points={player.points}
+              />
             ))}
           </div>
         </div>
@@ -73,59 +89,71 @@ export default function GamePage() {
             </div>
           </div>
           {/* <canvas className="w-full h-full border" /> */}
-          <Canvas/>
+          <Canvas />
         </div>
         <div className="w-[250px] bg-gray-100 p-4 flex flex-col">
           <div className="flex-1 overflow-y-auto space-y-2">
             {chats.map((chat, index) => (
-                <ChatMessage index={index} type={chat.type} message={chat.message}/>
+              <ChatMessage
+                index={index}
+                type={chat.type}
+                message={chat.message}
+              />
             ))}
           </div>
           <div className="mt-4">
-            <input type="text" placeholder="Type your guess here..." className="w-full p-2 border rounded" />
+            <input
+              type="text"
+              placeholder="Type your guess here..."
+              className="w-full p-2 border rounded"
+            />
           </div>
         </div>
       </div>
-    )
+    );
   }
-  
-  function ThumbsDownIcon(props:any) {
-    return (
-      <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M17 14V2" />
-        <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z" />
-      </svg>
-    )
-  }
-  
-  
-  function ThumbsUpIcon(props:any) {
-    return (
-      <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M7 10v12" />
-        <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z" />
-      </svg>
-    )
-  }
+
+  return <div>
+    <Spinner/>
+  </div>;
+}
+
+function ThumbsDownIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M17 14V2" />
+      <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z" />
+    </svg>
+  );
+}
+
+function ThumbsUpIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 10v12" />
+      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z" />
+    </svg>
+  );
+}
