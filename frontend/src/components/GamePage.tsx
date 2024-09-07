@@ -5,30 +5,64 @@ import ChatMessage from "./ui/ChatMessage";
 import UserCard from "./ui/UserCard";
 import Spinner from "./ui/Spinner";
 
+type UserData = {
+  userName: string;
+  score: number;
+  userId: string;
+};
+
 export default function GamePage() {
   const [isGameStarted, setIsGameStarted] = useState(false);
+  const [users, setUsers] = useState<UserData[]>();
+  const [isdrawingid, setIsDrawingid] = useState("");
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [word,setWord] = useState("")
 
-  const users = [
-    { name: "M3lee", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-    { name: "moon", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-    { name: "Ghost", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-    {
-      name: "ayush (You)",
-      points: 0,
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      name: "Daddy",
-      points: 0,
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      name: "Shrota",
-      points: 0,
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    { name: "Krish", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-  ];
+  socket.on("details", (data) => {
+    setUsers(data);
+    ``;
+  });
+
+  socket.on("newDrawer", (data) => {
+    if (data) {
+      setIsDrawingid(data);
+      if (socket.id === data) {
+        setIsDrawing(true);
+        console.log("you are the drawer" + typeof socket.id);
+      } else {
+        setIsDrawing(false);
+      }
+    }
+  });
+
+  socket.on("word", (data) => {
+    console.log(data);
+      setWord(data)
+  });
+
+  console.log(users);
+
+  //   const users = [
+  //     { name: "M3lee", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
+  //     { name: "moon", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
+  //     { name: "Ghost", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
+  //     {
+  //       name: "ayush (You)",
+  //       points: 0,
+  //       avatar: "/placeholder.svg?height=40&width=40",
+  //     },
+  //     {
+  //       name: "Daddy",
+  //       points: 0,
+  //       avatar: "/placeholder.svg?height=40&width=40",
+  //     },
+  //     {
+  //       name: "Shrota",
+  //       points: 0,
+  //       avatar: "/placeholder.svg?height=40&width=40",
+  //     },
+  //     { name: "Krish", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
+  //   ];
 
   const chats = [
     { message: "Krish joined the room!", type: "join" },
@@ -66,19 +100,22 @@ export default function GamePage() {
             <div className="text-lg">Round 1 of 3</div>
           </div>
           <div className="mt-4 space-y-2">
-            {users.map((player, index) => (
+            {users?.map((player, index) => (
               <UserCard
                 index={index}
-                name={player.name}
-                points={player.points}
+                name={player.userName}
+                points={player.score}
+                isDrawingId={isdrawingid}
+                userId={player.userId}
               />
             ))}
           </div>
         </div>
         <div className="flex-1 bg-white flex flex-col items-center justify-center">
           <div className="w-full p-4 bg-gray-200 flex items-center justify-between">
-            <div className="text-lg font-bold">GUESS THIS</div>
-            <div className="text-2xl">__a___h_</div>
+            {isDrawing ? (<div className="text-lg font-bold">DRAW THIS</div>) : (<div className="text-lg font-bold">GUESS THIS</div>)}
+            {isDrawing ? (<div className="text-2xl" >{word}</div>) : (<div className="text-2xl">__a___h_</div>)}
+            
             <div className="flex space-x-2">
               <button className="text-green-500">
                 <ThumbsUpIcon className="w-6 h-6" />
@@ -113,9 +150,11 @@ export default function GamePage() {
     );
   }
 
-  return <div>
-    <Spinner/>
-  </div>;
+  return (
+    <div>
+      <Spinner />
+    </div>
+  );
 }
 
 function ThumbsDownIcon(props: any) {

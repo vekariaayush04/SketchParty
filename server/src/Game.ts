@@ -1,6 +1,12 @@
 import { Socket } from "socket.io";
 import User from "./User";
 
+interface UserData {
+    userId : string,
+    userName : string,
+    score : number
+}
+
 export default class Game {
     players: User[];
     private currentDrawerIndex: number;
@@ -44,6 +50,7 @@ export default class Game {
 
     removePlayer(socket: Socket) {
         this.players = this.players.filter(player => player.userSocket !== socket);
+        this.getPlayersDetails()
     }
 
     isGameStarted(){
@@ -61,11 +68,25 @@ export default class Game {
         this.startRound();
     }
 
+    getPlayersDetails(){
+        const userData : UserData[]  = [];
+
+        this.players.forEach(player => {
+            const user : UserData = player.getUserData()
+            userData.push(user)
+        })
+
+        this.players.forEach(player => {
+            player.userSocket.emit('details', userData);
+        });
+    }
+
     private startRound() {
         if (this.round > this.players.length * this.round) {
             this.endGame();
             return;
         }
+        this.getPlayersDetails()
         this.assignDrawer();
         this.sendWordToDrawer();
         this.startRoundTimer();
