@@ -8,6 +8,13 @@ interface UserData {
     score : number
 }
 
+type DrawingEvent = {
+    Drawingtype: 'start' | 'draw' | 'end' | "clear"
+    x: number
+    y: number
+    color: string
+  }
+
 export default class Game {
     players: User[];
     private currentDrawerIndex: number;
@@ -137,6 +144,13 @@ export default class Game {
         setTimeout(() => {
             this.endRound();
         }, this.roundTime * 1000);
+    }
+
+    // Add this method to handle drawing events
+    handleDrawingEvent(event: DrawingEvent) {
+        this.players.forEach(player => {
+            player.userSocket.emit('drawEvent', event);
+        });
     }
 
     handleGuess(player: User, guess: string) {

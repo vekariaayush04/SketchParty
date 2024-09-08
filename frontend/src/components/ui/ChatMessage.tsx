@@ -8,7 +8,7 @@ const ChatMessage = ({index ,  type , message} : {
     <div
     key={index}
     className={`text-sm ${
-      type === "join" ? "text-green-500" : type === "leave" ? "text-red-500" : "text-black"
+      type === "join" ? "text-green-500" : type === "left" ? "text-red-500" : "text-black"
     }`}
   >
     {message}

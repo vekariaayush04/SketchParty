@@ -13,7 +13,7 @@ type UserData = {
 
 type ChatData = {
   message : string,
-  type: "guess" | "join" | "leave" | ""
+  type: "guess" | "join" | "left" | ""
 }
 
 export default function GamePage() {
@@ -37,17 +37,22 @@ export default function GamePage() {
     }
   });
 
-  socket.on("newDrawer", (data) => {
-    if (data) {
-      setIsDrawingid(data);
-      if (socket.id === data) {
-        setIsDrawing(true);
-        console.log("you are the drawer" + typeof socket.id);
-      } else {
-        setIsDrawing(false);
+  
+
+
+  useEffect(()=>{
+    socket.on("newDrawer", (data) => {
+      if (data) {
+        setIsDrawingid(data);
+        if (socket.id === data) {
+          setIsDrawing(true);
+          console.log("you are the drawer" + typeof socket.id);
+        } else {
+          setIsDrawing(false);
+        }
       }
-    }
-  });
+    });
+  },[])
 
   socket.on("word", (data) => {
     console.log(data);
@@ -69,6 +74,7 @@ export default function GamePage() {
   });
 
   socket.on("chat",(data)=>{
+    console.log(data);
     setChats([...chats,{
       message:data.message,
       type:data.type
@@ -119,7 +125,9 @@ export default function GamePage() {
             </div>
           </div>
           {/* <canvas className="w-full h-full border" /> */}
-          <Canvas />
+          <div>
+          <Canvas isdrawing={isDrawing} />
+          </div>
         </div>
         <div className="w-[250px] bg-gray-100 p-4 flex flex-col">
           <div className="flex-1 overflow-y-auto space-y-2">

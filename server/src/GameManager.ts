@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import Game from "./Game";
 import User from "./User";
-import { GUESS, INIT_GAME } from "./message";
+import { DRAW, GUESS, INIT_GAME } from "./message";
 
 export default class GameManager {
     private games: Game[];
@@ -22,6 +22,7 @@ export default class GameManager {
     }
 
     removeUser(socket: Socket) {
+        const leavingUser = this.users.find(user => user.userSocket === socket);
         this.users = this.users.filter(user => user.userSocket !== socket);
 
         if (this.pendingGame) {
@@ -31,7 +32,18 @@ export default class GameManager {
             }
         }
 
-        this.games.forEach(game => game.removePlayer(socket));
+        this.games.forEach((game)=>{
+            if(game.hasPlayer(leavingUser!)){
+                game.removePlayer(socket)
+                game.addMessage({
+                    userId: leavingUser!.userId,
+                    message: `${leavingUser!.userName} left the Room`,
+                    type: "left"
+                });
+            }
+        })
+
+
         console.log(this.pendingGame);
         
     }
@@ -42,7 +54,7 @@ export default class GameManager {
             console.log(`User ${user.userName} is already in the pending game.`);
             return;
         }
-
+        
         // Check if the user is already in an active game
         const activeGame = this.games.find(game => game.hasPlayer(user));
         if (activeGame) {
@@ -92,6 +104,11 @@ export default class GameManager {
                     message : message.message,
                     type : message.chatType
                 })
+            }
+
+            if (message.type === DRAW) {
+                const game = this.games.find((game) => game.hasPlayer(user))
+                game?.handleDrawingEvent(message.event)
             }
         });
     }
