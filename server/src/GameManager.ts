@@ -17,7 +17,6 @@ export default class GameManager {
     addUser(socket: Socket) {
         const user = new User(socket);
         this.users.push(user);
-        //this.addToPendingGame(user);
         this.handleMessage(user);
     }
 
@@ -88,13 +87,7 @@ export default class GameManager {
             if (message.type === INIT_GAME) {
                 user.addUserName(message.userName);
                 this.addToPendingGame(user);
-                //console.log(this.pendingGame);
-                this.pendingGame?.isGameStarted();
-                // this.pendingGame?.addMessage({
-                //     userId : message.userId,
-                //     message : message.message,
-                //     type : message.chatType
-                // })            
+                this.pendingGame?.isGameStarted();         
             }
 
             if (message.type === GUESS) {
