@@ -8,7 +8,12 @@ const StartPage = () => {
 
   const startGame = (e: any) => {
     e.preventDefault();
-    socket.emit("message", { type: "init_game" }, playerName);
+
+    socket.emit("message", { 
+      type: "init_game",
+      userName : playerName,
+    });
+
     console.log("Game started with player:", playerName);
     navigate("/game");
   };

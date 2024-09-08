@@ -1,5 +1,6 @@
 import { Socket } from "socket.io";
 import User from "./User";
+import { Chat } from "./Chat";
 
 interface UserData {
     userId : string,
@@ -15,6 +16,7 @@ export default class Game {
     private round: number;
     private roundTime: number;
     private gameStarted: boolean;
+    private chatData : Chat[];
 
     constructor(roundTime: number = 60) {
         this.players = [];
@@ -24,6 +26,7 @@ export default class Game {
         this.round = 1;
         this.roundTime = roundTime;
         this.gameStarted = false;
+        this.chatData = []
     }
 
     private generateWords(): string[] {
@@ -92,6 +95,20 @@ export default class Game {
         this.startRoundTimer();
     }
 
+    addMessage(chat : Chat){
+
+        this.chatData.push(chat)
+
+        this.players.forEach(player => {
+            player.userSocket.emit('chat', this.chatData.slice(-1)[0]);
+        });
+
+    }
+
+    sendMessage(){
+
+    }
+
     private assignDrawer() {
         this.currentDrawerIndex = this.round % this.players.length;
         const currentDrawer = this.players[this.currentDrawerIndex];
@@ -130,7 +147,7 @@ export default class Game {
                     p.userSocket.emit('otherPlayerGuessed', player.userSocket.id);
                 }
             });
-            this.endRound();
+            //this.endRound();
         } else {
             player.userSocket.emit('incorrectGuess');
         }

@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import Game from "./Game";
 import User from "./User";
-import { INIT_GAME } from "./message";
+import { GUESS, INIT_GAME } from "./message";
 
 export default class GameManager {
     private games: Game[];
@@ -69,15 +69,29 @@ export default class GameManager {
     }
 
     handleMessage(user: User) {
-        user.userSocket.on("message", (data,playerName) => {
+        user.userSocket.on("message", (data) => {
             const message = data
             console.log(message);
             
             if (message.type === INIT_GAME) {
-                user.addUserName(playerName)
-                this.addToPendingGame(user)
-                console.log(this.pendingGame);
-                this.pendingGame?.isGameStarted()            
+                user.addUserName(message.userName);
+                this.addToPendingGame(user);
+                //console.log(this.pendingGame);
+                this.pendingGame?.isGameStarted();
+                // this.pendingGame?.addMessage({
+                //     userId : message.userId,
+                //     message : message.message,
+                //     type : message.chatType
+                // })            
+            }
+
+            if (message.type === GUESS) {
+                const game = this.games.find((game) => game.hasPlayer(user))
+                game?.addMessage({
+                    userId : message.userId,
+                    message : message.message,
+                    type : message.chatType
+                })
             }
         });
     }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { socket } from "../socket";
 import Canvas from "./Canvas";
 import ChatMessage from "./ui/ChatMessage";
@@ -11,16 +11,30 @@ type UserData = {
   userId: string;
 };
 
+type ChatData = {
+  message : string,
+  type: "guess" | "join" | "leave" | ""
+}
+
 export default function GamePage() {
   const [isGameStarted, setIsGameStarted] = useState(false);
-  const [users, setUsers] = useState<UserData[]>();
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [user,setUser] = useState<UserData>({
+    userName : "",
+    userId : "",
+    score : 0
+  })
   const [isdrawingid, setIsDrawingid] = useState("");
   const [isDrawing, setIsDrawing] = useState(false);
   const [word,setWord] = useState("")
-
-  socket.on("details", (data) => {
-    setUsers(data);
-    ``;
+  const [chats,setChats] = useState<ChatData[]>([])
+  const [message,setMessage] = useState("")
+  socket.on("details", (data:UserData[]) => {
+    if(data){
+      setUsers(data);
+      const currUser = data.find((elem) => socket.id === elem.userId)
+      setUser(currUser!)
+    }
   });
 
   socket.on("newDrawer", (data) => {
@@ -40,56 +54,35 @@ export default function GamePage() {
       setWord(data)
   });
 
-  console.log(users);
-
-  //   const users = [
-  //     { name: "M3lee", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-  //     { name: "moon", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-  //     { name: "Ghost", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-  //     {
-  //       name: "ayush (You)",
-  //       points: 0,
-  //       avatar: "/placeholder.svg?height=40&width=40",
-  //     },
-  //     {
-  //       name: "Daddy",
-  //       points: 0,
-  //       avatar: "/placeholder.svg?height=40&width=40",
-  //     },
-  //     {
-  //       name: "Shrota",
-  //       points: 0,
-  //       avatar: "/placeholder.svg?height=40&width=40",
-  //     },
-  //     { name: "Krish", points: 0, avatar: "/placeholder.svg?height=40&width=40" },
-  //   ];
-
-  const chats = [
-    { message: "Krish joined the room!", type: "join" },
-    { message: "sapna joined the room!", type: "join" },
-    { message: "sapna left the room!", type: "leave" },
-    { message: "Ghost: vegeta", type: "chat" },
-    {
-      message: "Mia joined the room!",
-      type: "join",
-    },
-    {
-      message: "Mia left the room!",
-      type: "leave",
-    },
-    {
-      message: "Ghost: ani",
-      type: "chat",
-    },
-    { message: "Krish: boy", type: "chat" },
-    { message: "Ghost: ani", type: "chat" },
-    { message: "CHALU PANDEY joined the room!", type: "join" },
-    { message: "CHALU PANDEY left the room!", type: "leave" },
-  ];
-
+  useEffect(() => {
+    if (users.length === 3 && chats.length < 3) {
+      const newChats : ChatData[] = users.map((user) => ({
+        message: `${user.userName} joined the Room !!!`,
+        type: "join",
+      }));
+      setChats([...chats, ...newChats]);
+    }
+  }, [users]);
+  
   socket.on("gameStart", (data) => {
     setIsGameStarted(data);
   });
+
+  socket.on("chat",(data)=>{
+    setChats([...chats,{
+      message:data.message,
+      type:data.type
+    }])
+  })
+
+  function sendMessage() {
+    socket.emit("message",{
+      type : "guess",
+      userId : socket.id,
+      message : `${user.userName} : ${message} `,
+      chatType : "guess"
+    })
+  }
 
   if (isGameStarted) {
     return (
@@ -138,12 +131,16 @@ export default function GamePage() {
               />
             ))}
           </div>
-          <div className="mt-4">
+          <div className="mt-4 flex border-2 ">
             <input
               type="text"
               placeholder="Type your guess here..."
               className="w-full p-2 border rounded"
+              onChange={(e) => {
+                setMessage(e.target.value)
+              }}
             />
+            <button onClick={sendMessage}>Send</button>
           </div>
         </div>
       </div>
