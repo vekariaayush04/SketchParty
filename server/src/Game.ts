@@ -27,8 +27,8 @@ export default class Game {
 
     constructor(roundTime: number = 60) {
         this.players = [];
-        this.currentDrawerIndex = 0; // Start with the first player
-        this.words = this.generateWords(); // Generate an array of 50 random words
+        this.currentDrawerIndex = 0; 
+        this.words = this.generateWords(); 
         this.currentWord = '';
         this.round = 1;
         this.roundTime = roundTime;
@@ -45,7 +45,7 @@ export default class Game {
             "book", "pen", "notebook", "pencil", "eraser", "ruler", "scissors", "glue", "marker", "crayon"
         ];
 
-        return wordList.sort(() => Math.random() - 0.5); // Shuffle the words array
+        return wordList.sort(() => Math.random() - 0.5);
     }
 
     addPlayer(player : User){
@@ -121,7 +121,6 @@ export default class Game {
         const currentDrawer = this.players[this.currentDrawerIndex];
         console.log("current user is : " + currentDrawer.userName);
         
-        // Notify all players about the new drawer
         this.players.forEach(player => {
             player.userSocket.emit('newDrawer', currentDrawer.userSocket.id);
         });
@@ -138,48 +137,50 @@ export default class Game {
     private startRoundTimer() {
         let counter: number = this.roundTime;
     
-        // Notify all players that the round has started
         this.players.forEach(player => {
             player.userSocket.emit('round', { round: this.round, time: this.roundTime });
         });
     
         const intervalId = setInterval(() => {
-            console.log(counter);
     
-            // Emit the current timer value to all players
             this.players.forEach(player => {
                 player.userSocket.emit('roundTimer', { time: counter , type : "running"});
             });
     
             counter--;
     
-            // Check if the timer has reached 0
             if (counter < 0) {
-                clearInterval(intervalId); // Clear the interval to stop the timer
-                this.endRound(); // End the round
+                clearInterval(intervalId); 
+                this.endRound(); 
             }
         }, 1000);
     }
     
 
-    // Add this method to handle drawing events
     handleDrawingEvent(event: DrawingEvent) {
         this.players.forEach(player => {
             player.userSocket.emit('drawEvent', event);
         });
     }
 
-    handleGuess(player: User, guess: string) {
-        if (guess.toLowerCase() === this.currentWord.toLowerCase()) {
-            player.userSocket.emit('correctGuess', { word: this.currentWord });
+    handleGuess(player: User, message : any) {
+        if (message.message.toLowerCase() === this.currentWord.toLowerCase()) {
+
             this.players.forEach(p => {
-                if (p !== player) {
-                    p.userSocket.emit('otherPlayerGuessed', player.userSocket.id);
-                }
+                p.userSocket.emit('correctGuess', {
+                    userId: player.userId,
+                    userName: player.userName,
+                    message: `${player.userName} guessed the word!`
+                });
             });
             //this.endRound();
         } else {
-            player.userSocket.emit('incorrectGuess');
+            player.userSocket.emit('incorrectGuess',{
+                userId : message.userId,
+                userName : player.userName,
+                message : message.message,
+                type : message.chatType
+            });
         }
     }
 
@@ -187,7 +188,6 @@ export default class Game {
         this.round++;
         let buffer:number = 15;
         if (this.round <= this.players.length * 3) {
-             // Example: 3 rounds per player
             const bufferId = setInterval(() => {
                 this.players.forEach(player => {
                     player.userSocket.emit('roundTimer', { time: buffer , type: "break" });
@@ -195,10 +195,9 @@ export default class Game {
         
                 buffer--;
         
-                // Check if the timer has reached 0
                 if (buffer < 0) {
-                    clearInterval(bufferId); // Clear the interval to stop the timer
-                    this.startRound(); // End the round
+                    clearInterval(bufferId);
+                    this.startRound(); 
                 }
             },1000)
             //this.startRound();
@@ -208,14 +207,13 @@ export default class Game {
     }
 
     private endGame() {
-        // Logic to handle end of game, e.g., send scores, declare winner, etc.
         this.players.forEach(player => {
             player.userSocket.emit('gameEnd', { winner: this.determineWinner() });
         });
     }
 
     private determineWinner(): User | null {
-        // Implement logic to determine the winner based on scores, etc.
-        return null; // Placeholder logic
+        //todo : add logic
+        return null;
     }
 }

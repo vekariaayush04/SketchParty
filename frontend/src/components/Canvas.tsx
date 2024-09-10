@@ -14,14 +14,11 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
   const [isVisualMode, setIsVisualMode] = useState(!isdrawing)
   const [color, setColor] = useState('#000000')
 
-  // Update internal drawing state when isdrawing prop changes
   useEffect(() => {
-    //setIsDrawing(isdrawing)
     setIsVisualMode(!isdrawing)
     clearCanvas()
   }, [isdrawing])
 
-  // Add socket listener in useEffect to avoid multiple listeners
   useEffect(() => {
     const handleRemoteDrawing = (data: DrawingEvent) => {
       draw(data)
@@ -29,7 +26,6 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
     
     socket.on('drawEvent', handleRemoteDrawing)
 
-    // Cleanup listener on component unmount
     return () => {
       socket.off('drawEvent', handleRemoteDrawing)
     }
@@ -125,7 +121,7 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
   }
 
   return (
-    <div className="flex flex-col items-center space-y-4 p-4">
+    <div className="flex flex-col items-center  p-4 mt-4">
       <canvas
         ref={canvasRef}
         width={500}

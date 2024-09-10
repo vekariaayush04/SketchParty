@@ -27,7 +27,7 @@ export default class GameManager {
         if (this.pendingGame) {
             this.pendingGame.removePlayer(socket);
             if (this.pendingGame.players.length === 0) {
-                this.pendingGame = null; // Reset if no players left
+                this.pendingGame = null; 
             }
         }
 
@@ -48,13 +48,11 @@ export default class GameManager {
     }
 
     addToPendingGame(user: User) {
-        // Check if the user is already in the pending game
         if (this.pendingGame && this.pendingGame.hasPlayer(user)) {
             console.log(`User ${user.userName} is already in the pending game.`);
             return;
         }
         
-        // Check if the user is already in an active game
         const activeGame = this.games.find(game => game.hasPlayer(user));
         if (activeGame) {
             console.log(`User ${user.userName} is already in an active game.`);
@@ -69,7 +67,7 @@ export default class GameManager {
 
         if (this.pendingGame.players.length >= 3) {
             this.startGame(this.pendingGame);
-            this.pendingGame = null; // Reset pendingGame for the next set of players
+            this.pendingGame = null; 
         }
     }
 
@@ -92,11 +90,12 @@ export default class GameManager {
 
             if (message.type === GUESS) {
                 const game = this.games.find((game) => game.hasPlayer(user))
-                game?.addMessage({
-                    userId : message.userId,
-                    message : message.message,
-                    type : message.chatType
-                })
+                // game?.addMessage({
+                //     userId : message.userId,
+                //     message : message.message,
+                //     type : message.chatType
+                // })
+                game?.handleGuess(user,message)
             }
 
             if (message.type === DRAW) {

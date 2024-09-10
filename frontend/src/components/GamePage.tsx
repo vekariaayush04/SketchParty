@@ -12,13 +12,15 @@ type UserData = {
 };
 
 type ChatData = {
+  userId : string,
   message : string,
-  type: "guess" | "join" | "left" | ""
+  type: "guess" | "join" | "left" | "",
 }
 
 export default function GamePage() {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [users, setUsers] = useState<UserData[]>([]);
+  const [round,setRound] = useState(1)
   const [user,setUser] = useState<UserData>({
     userName : "",
     userId : "",
@@ -27,8 +29,13 @@ export default function GamePage() {
   const [isdrawingid, setIsDrawingid] = useState("");
   const [isDrawing, setIsDrawing] = useState(false);
   const [word,setWord] = useState("")
+  const [timer,setTimer] = useState(0)
   const [chats,setChats] = useState<ChatData[]>([])
   const [message,setMessage] = useState("")
+  const [mode,setMode] = useState("break")
+  const [guess,setGuess] = useState(false)
+
+
   socket.on("details", (data:UserData[]) => {
     if(data){
       setUsers(data);
@@ -36,9 +43,6 @@ export default function GamePage() {
       setUser(currUser!)
     }
   });
-
-  
-
 
   useEffect(()=>{
     socket.on("newDrawer", (data) => {
@@ -59,11 +63,29 @@ export default function GamePage() {
       setWord(data)
   });
 
+  socket.on("round",(data) => {
+    if(data){
+      console.log(data);
+      setRound(data.round)
+      
+      //setTimer(data.time)
+    }
+  }) 
+
+  socket.on("roundTimer",(data) => {
+    if(data){
+      setTimer(data.time)
+      setMode(data.type)
+    }
+  }) 
+ 
+
   useEffect(() => {
     if (users.length === 3 && chats.length < 3) {
       const newChats : ChatData[] = users.map((user) => ({
         message: `${user.userName} joined the Room !!!`,
         type: "join",
+        userId : user.userId
       }));
       setChats([...chats, ...newChats]);
     }
@@ -76,6 +98,7 @@ export default function GamePage() {
   socket.on("chat",(data)=>{
     console.log(data);
     setChats([...chats,{
+      userId:data.userId,
       message:data.message,
       type:data.type
     }])
@@ -85,18 +108,39 @@ export default function GamePage() {
     socket.emit("message",{
       type : "guess",
       userId : socket.id,
-      message : `${user.userName} : ${message} `,
+      message : message,
       chatType : "guess"
     })
   }
+  
+  socket.on("correctGuess",(data) =>{
+    if(data){
+      setChats([...chats,{
+        userId : data.userId,
+        message : `${data.userName} guessed the word`,
+        type : "guess"
+      }])
+    }
+  })
+
+  socket.on("incorrectGuess",(data) =>{
+    setChats([...chats,{
+      userId : data.userId,
+      type : data.type,
+      message : `${data.userName} : ${data.message}`
+    }])
+  })
 
   if (isGameStarted) {
     return (
       <div className="flex h-screen">
         <div className="w-[250px] bg-gray-100 p-4">
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold">29</div>
-            <div className="text-lg">Round 1 of 3</div>
+            <div className="text-2xl font-bold countdown">
+              {/* <Countdown timer={timer}/> */}
+              {timer}
+            </div>
+            <div className="text-lg">Round {round} of 3</div>
           </div>
           <div className="mt-4 space-y-2">
             {users?.map((player, index) => (
@@ -111,9 +155,9 @@ export default function GamePage() {
           </div>
         </div>
         <div className="flex-1 bg-white flex flex-col items-center justify-center">
-          <div className="w-full p-4 bg-gray-200 flex items-center justify-between">
+          <div className="w-[780px] p-4 bg-gray-200 flex items-center justify-between top-0 fixed">
             {isDrawing ? (<div className="text-lg font-bold">DRAW THIS</div>) : (<div className="text-lg font-bold">GUESS THIS</div>)}
-            {isDrawing ? (<div className="text-2xl" >{word}</div>) : (<div className="text-2xl">__a___h_</div>)}
+            {isDrawing ? (<div className="text-2xl" >{word}</div>) : (<div className="text-2xl">{word}</div>)}
             
             <div className="flex space-x-2">
               <button className="text-green-500">
@@ -124,9 +168,8 @@ export default function GamePage() {
               </button>
             </div>
           </div>
-          {/* <canvas className="w-full h-full border" /> */}
           <div>
-          <Canvas isdrawing={isDrawing} />
+          {mode === "running" ? (<Canvas isdrawing={isDrawing} />) : (<div>Game will start soon ...</div>)}
           </div>
         </div>
         <div className="w-[250px] bg-gray-100 p-4 flex flex-col">
