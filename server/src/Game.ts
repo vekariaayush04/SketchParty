@@ -1,19 +1,7 @@
 import { Socket } from "socket.io";
 import User from "./User";
-import { Chat } from "./Chat";
-
-interface UserData {
-    userId : string,
-    userName : string,
-    score : number
-}
-
-type DrawingEvent = {
-    Drawingtype: 'start' | 'draw' | 'end' | "clear"
-    x: number
-    y: number
-    color: string
-  }
+import { Chat , DrawingEvent, UserData } from "./types/types";
+import { generateWords } from "./utils/Words";
 
 export default class Game {
     players: User[];
@@ -25,27 +13,15 @@ export default class Game {
     private gameStarted: boolean;
     private chatData : Chat[];
 
-    constructor(roundTime: number = 60) {
+    constructor(roundTime: number = 30) {
         this.players = [];
         this.currentDrawerIndex = 0; 
-        this.words = this.generateWords(); 
+        this.words = generateWords(); 
         this.currentWord = '';
         this.round = 1;
         this.roundTime = roundTime;
         this.gameStarted = false;
         this.chatData = []
-    }
-
-    private generateWords(): string[] {
-        const wordList = [
-            "apple", "banana", "grape", "orange", "pear", "pineapple", "strawberry", "watermelon", "cherry", "blueberry",
-            "car", "bus", "train", "airplane", "bicycle", "motorcycle", "truck", "boat", "submarine", "helicopter",
-            "house", "apartment", "castle", "cottage", "mansion", "tent", "igloo", "lighthouse", "skyscraper", "villa",
-            "dog", "cat", "elephant", "giraffe", "lion", "tiger", "bear", "monkey", "zebra", "kangaroo",
-            "book", "pen", "notebook", "pencil", "eraser", "ruler", "scissors", "glue", "marker", "crayon"
-        ];
-
-        return wordList.sort(() => Math.random() - 0.5);
     }
 
     addPlayer(player : User){
@@ -112,10 +88,6 @@ export default class Game {
 
     }
 
-    sendMessage(){
-
-    }
-
     private assignDrawer() {
         this.currentDrawerIndex = this.round % this.players.length;
         const currentDrawer = this.players[this.currentDrawerIndex];
@@ -165,28 +137,35 @@ export default class Game {
 
     handleGuess(player: User, message : any) {
         if (message.message.toLowerCase() === this.currentWord.toLowerCase()) {
+            //let score = 100;
+            let score = player.score
+            player.updateScore(score + 100)
 
             this.players.forEach(p => {
                 p.userSocket.emit('correctGuess', {
                     userId: player.userId,
                     userName: player.userName,
-                    message: `${player.userName} guessed the word!`
+                    message: `${player.userName} guessed the word!`,
+                    score: player.score
                 });
             });
             //this.endRound();
         } else {
-            player.userSocket.emit('incorrectGuess',{
-                userId : message.userId,
-                userName : player.userName,
-                message : message.message,
-                type : message.chatType
-            });
+            this.players.forEach(player => {
+                player.userSocket.emit('incorrectGuess',{
+                    userId : message.userId,
+                    userName : message.userName,
+                    message : message.message,
+                    type : message.chatType
+                });
+            })
+            
         }
     }
 
     private endRound() {
         this.round++;
-        let buffer:number = 15;
+        let buffer:number = 10;
         if (this.round <= this.players.length * 3) {
             const bufferId = setInterval(() => {
                 this.players.forEach(player => {
@@ -196,6 +175,17 @@ export default class Game {
                 buffer--;
         
                 if (buffer < 0) {
+                    
+                    const userData : UserData[]  = [];
+
+                    this.players.forEach(player => {
+                        const user : UserData = player.getUserData()
+                        userData.push(user)
+                    })
+
+                    this.players.forEach(p => {
+                        p.userSocket.emit("updatedScores", userData)
+                    })
                     clearInterval(bufferId);
                     this.startRound(); 
                 }
@@ -207,8 +197,19 @@ export default class Game {
     }
 
     private endGame() {
+
+        let winner = ""
+        let score = 0
+        this.players.forEach(p => {
+            console.log(p.userName + "score :" + p.score);
+            
+            if(score < p.score){
+                score = p.score
+                winner = p.userName
+            }
+        })
         this.players.forEach(player => {
-            player.userSocket.emit('gameEnd', { winner: this.determineWinner() });
+            player.userSocket.emit('gameEnd', { winner: winner });
         });
     }
 

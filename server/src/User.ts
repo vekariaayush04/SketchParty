@@ -4,7 +4,7 @@ export default class User {
     userSocket: Socket;
     userId : string
     userName: string;
-    private score: number;
+    score: number;
 
     constructor(socket: Socket) {
         this.userSocket = socket;
@@ -15,6 +15,10 @@ export default class User {
 
     addUserName(username: string) {
         this.userName = username;
+    }
+
+    updateScore(score: number){
+        this.score = score
     }
 
     getUserData() {

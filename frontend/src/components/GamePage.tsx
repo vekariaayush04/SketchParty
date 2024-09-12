@@ -6,6 +6,7 @@ import UserCard from "./ui/UserCard";
 import Spinner from "./ui/Spinner";
 import { ThumbsDownIcon } from "./ui/icons/thumbs-down";
 import { ThumbsUpIcon } from "./ui/icons/thumbs-up";
+import { div } from "framer-motion/client";
 
 type UserData = {
   userName: string;
@@ -24,11 +25,11 @@ export default function GamePage() {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [users, setUsers] = useState<UserData[]>([]);
   const [round,setRound] = useState(1)
-  // const [user,setUser] = useState<UserData>({
-  //   userName : "",
-  //   userId : "",
-  //   score : 0
-  // })
+  const [user,setUser] = useState<UserData>({
+    userName : "",
+    userId : "",
+    score : 0
+  })
   const [isdrawingid, setIsDrawingid] = useState("");
   const [isDrawing, setIsDrawing] = useState(false);
   const [word,setWord] = useState("")
@@ -36,14 +37,15 @@ export default function GamePage() {
   const [chats,setChats] = useState<ChatData[]>([])
   const [message,setMessage] = useState("")
   const [mode,setMode] = useState("break")
+  const [winner,setWinner] = useState(null)
   //const [guess,setGuess] = useState(false)
 
 
   socket.on("details", (data:UserData[]) => {
     if(data){
       setUsers(data);
-      //const currUser = data.find((elem) => socket.id === elem.userId)
-      //setUser(currUser!)
+      const currUser = data.find((elem) => socket.id === elem.userId)
+      setUser(currUser!)
     }
   });
 
@@ -109,7 +111,8 @@ export default function GamePage() {
       type : "guess",
       userId : socket.id,
       message : message,
-      chatType : "guess"
+      chatType : "guess",
+      userName : user.userName
     })
   }
   
@@ -120,15 +123,34 @@ export default function GamePage() {
         message : `${data.userName} guessed the word`,
         type : "guess"
       }])
+      if(data.userId === socket.id){
+        setUser({...user,score:data.score})
+      }
     }
   })
 
+  socket.on("gameEnd", (data) => {
+    if(data){
+      setMode("ended")
+      setWinner(data.winner)
+    }
+  });
+
+  socket.on("updatedScores", (data) => {
+    if(data){
+      setUsers(data)
+    }
+  });
+
+
   socket.on("incorrectGuess",(data) =>{
-    setChats([...chats,{
-      userId : data.userId,
-      type : data.type,
-      message : `${data.userName} : ${data.message}`
-    }])
+    if(data){
+      setChats([...chats,{
+        userId : data.userId,
+        type : data.type,
+        message : `${data.userName} : ${data.message}`
+      }])
+    }
   })
 
   if (isGameStarted) {
@@ -169,6 +191,9 @@ export default function GamePage() {
           </div>
           <div>
           {mode === "running" ? (<Canvas isdrawing={isDrawing} />) : (<div>Game will start soon ...</div>)}
+          {mode === "ended" && (
+            <div>Winner is {winner}</div>
+          )}
           </div>
         </div>
         <div className="w-[250px] bg-gray-100 p-4 flex flex-col">
@@ -181,7 +206,7 @@ export default function GamePage() {
               />
             ))}
           </div>
-          <div className="mt-4 flex border-2 ">
+          {!isDrawing && (<div className="mt-4 flex border-2 ">
             <input
               type="text"
               placeholder="Type your guess here..."
@@ -191,7 +216,7 @@ export default function GamePage() {
               }}
             />
             <button onClick={sendMessage}>Send</button>
-          </div>
+          </div>)}
         </div>
       </div>
     );
