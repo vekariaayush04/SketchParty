@@ -6,7 +6,6 @@ import UserCard from "./ui/UserCard";
 import Spinner from "./ui/Spinner";
 import { ThumbsDownIcon } from "./ui/icons/thumbs-down";
 import { ThumbsUpIcon } from "./ui/icons/thumbs-up";
-import { div } from "framer-motion/client";
 
 type UserData = {
   userName: string;
