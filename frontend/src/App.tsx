@@ -6,8 +6,6 @@ import GamePage from "./components/GamePage";
 export default function App() {
 
   return (
-   //<StartPage/>
-   //<GamePage/>
    <BrowserRouter>
     <Routes>
       <Route path="/" element={<StartPage/>}></Route>

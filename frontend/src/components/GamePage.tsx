@@ -4,6 +4,8 @@ import Canvas from "./Canvas";
 import ChatMessage from "./ui/ChatMessage";
 import UserCard from "./ui/UserCard";
 import Spinner from "./ui/Spinner";
+import { ThumbsDownIcon } from "./ui/icons/thumbs-down";
+import { ThumbsUpIcon } from "./ui/icons/thumbs-up";
 
 type UserData = {
   userName: string;
@@ -18,14 +20,15 @@ type ChatData = {
 }
 
 export default function GamePage() {
+
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [users, setUsers] = useState<UserData[]>([]);
   const [round,setRound] = useState(1)
-  const [user,setUser] = useState<UserData>({
-    userName : "",
-    userId : "",
-    score : 0
-  })
+  // const [user,setUser] = useState<UserData>({
+  //   userName : "",
+  //   userId : "",
+  //   score : 0
+  // })
   const [isdrawingid, setIsDrawingid] = useState("");
   const [isDrawing, setIsDrawing] = useState(false);
   const [word,setWord] = useState("")
@@ -33,14 +36,14 @@ export default function GamePage() {
   const [chats,setChats] = useState<ChatData[]>([])
   const [message,setMessage] = useState("")
   const [mode,setMode] = useState("break")
-  const [guess,setGuess] = useState(false)
+  //const [guess,setGuess] = useState(false)
 
 
   socket.on("details", (data:UserData[]) => {
     if(data){
       setUsers(data);
-      const currUser = data.find((elem) => socket.id === elem.userId)
-      setUser(currUser!)
+      //const currUser = data.find((elem) => socket.id === elem.userId)
+      //setUser(currUser!)
     }
   });
 
@@ -66,9 +69,7 @@ export default function GamePage() {
   socket.on("round",(data) => {
     if(data){
       console.log(data);
-      setRound(data.round)
-      
-      //setTimer(data.time)
+      setRound(data.round)      
     }
   }) 
 
@@ -79,7 +80,6 @@ export default function GamePage() {
     }
   }) 
  
-
   useEffect(() => {
     if (users.length === 3 && chats.length < 3) {
       const newChats : ChatData[] = users.map((user) => ({
@@ -137,7 +137,6 @@ export default function GamePage() {
         <div className="w-[250px] bg-gray-100 p-4">
           <div className="flex items-center justify-between">
             <div className="text-2xl font-bold countdown">
-              {/* <Countdown timer={timer}/> */}
               {timer}
             </div>
             <div className="text-lg">Round {round} of 3</div>
@@ -157,7 +156,7 @@ export default function GamePage() {
         <div className="flex-1 bg-white flex flex-col items-center justify-center">
           <div className="w-[780px] p-4 bg-gray-200 flex items-center justify-between top-0 fixed">
             {isDrawing ? (<div className="text-lg font-bold">DRAW THIS</div>) : (<div className="text-lg font-bold">GUESS THIS</div>)}
-            {isDrawing ? (<div className="text-2xl" >{word}</div>) : (<div className="text-2xl">{word}</div>)}
+            {isDrawing ? (<div className="text-2xl" >{word}</div>) : (<div className="text-2xl">_a_a_a</div>)}
             
             <div className="flex space-x-2">
               <button className="text-green-500">
@@ -202,45 +201,5 @@ export default function GamePage() {
     <div>
       <Spinner />
     </div>
-  );
-}
-
-function ThumbsDownIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M17 14V2" />
-      <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z" />
-    </svg>
-  );
-}
-
-function ThumbsUpIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M7 10v12" />
-      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z" />
-    </svg>
   );
 }

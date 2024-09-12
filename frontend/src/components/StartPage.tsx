@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { socket } from "../socket";
 import { useNavigate } from "react-router-dom";
-import bg from "./../assets/background.webp"
+import bg from "./../assets/bgg.png"; // Import the background image
 
 const StartPage = () => {
   const navigate = useNavigate();
   const [playerName, setPlayerName] = useState("");
 
-  const startGame = (e: any) => {
+  const startGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     socket.emit("message", { 
       type: "init_game",
-      userName : playerName,
+      userName: playerName,
     });
 
     console.log("Game started with player:", playerName);
@@ -20,29 +20,32 @@ const StartPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-900 text-white"
-    style={{ backgroundImage: `url(${bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-      <div className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-center mb-6 text-blue-400">
-          Start Your Game
-        </h1>
+    <div
+      className="flex items-center flex-col justify-center h-screen bg-cover bg-center text-white"
+      style={{ backgroundImage: `url(${bg})` }} // Apply the background image
+    >
+     
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg mt-40">
+        <h2 className="text-2xl font-semibold text-center mb-6 text-gray-700">
+          Get Ready to Play!
+        </h2>
         <form onSubmit={startGame} className="flex flex-col">
           <input
             type="text"
             placeholder="Enter your name"
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
-            className="p-3 mb-4 text-lg rounded-md bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+            className="p-3 mb-4 text-lg rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center"
           />
           <button
             type="submit"
-            className="p-3 text-lg rounded-md bg-blue-500 hover:bg-blue-600 transition-colors mb-4"
+            className="w-full p-3 text-xl font-semibold text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all shadow-md mb-4"
           >
-            Play !!
+            Play Now
           </button>
           <button
             type="submit"
-            className="p-3 text-lg rounded-md bg-blue-500 hover:bg-blue-600 transition-colors"
+            className="w-full p-3 text-lg text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
           >
             Create Room
           </button>
