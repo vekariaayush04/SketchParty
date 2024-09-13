@@ -110,9 +110,9 @@ export default class Game {
         let counter: number = this.roundTime;
     
         this.players.forEach(player => {
-            player.userSocket.emit('round', { round: this.round, time: this.roundTime });
+            player.userSocket.emit('round', { round: this.round, time: this.roundTime ,type : "running"});
         });
-    
+        
         const intervalId = setInterval(() => {
     
             this.players.forEach(player => {
@@ -124,6 +124,9 @@ export default class Game {
             if (counter < 0) {
                 clearInterval(intervalId); 
                 this.endRound(); 
+                this.players.forEach(player => {
+                    player.userSocket.emit('round', { round: this.round, time: this.roundTime ,type : "ended"});
+                });
             }
         }, 1000);
     }
@@ -169,7 +172,7 @@ export default class Game {
         if (this.round <= this.players.length * 3) {
             const bufferId = setInterval(() => {
                 this.players.forEach(player => {
-                    player.userSocket.emit('roundTimer', { time: buffer , type: "break" });
+                    player.userSocket.emit('roundTimer', { time: buffer});
                 });
         
                 buffer--;

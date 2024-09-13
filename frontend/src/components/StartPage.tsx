@@ -4,10 +4,14 @@ import { useNavigate } from "react-router-dom";
 import bg from "./../assets/bgg.png";
 import mobilebg from "./../assets/bgg mobile1.jpg";
 import tablet from "./../assets/bgg mobile.jpg";
+import GamePage from "./GamePage";
+// import Avatar from "boring-avatars";
+// import { generateColors } from "../util/colorGenerator";
 
 const StartPage = () => {
   const navigate = useNavigate();
   const [playerName, setPlayerName] = useState("");
+  const [isPlayed,setIsPlayed] = useState(false)
 
   const startGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,8 +22,15 @@ const StartPage = () => {
     });
 
     console.log("Game started with player:", playerName);
+    setIsPlayed(true)
     navigate("/game");
   };
+
+  if(isPlayed){
+    return (
+      <GamePage/>
+    )
+  }
 
   return (
     <div

@@ -1,32 +1,18 @@
-import  { useState, useEffect } from 'react';
+import  { useState } from 'react'
+import { socket } from '../../socket';
 
-const Countdown = ({timer} : {
-    timer : number
-}) => {
-    console.log(timer);
-    
-    const [timeLeft, setTimeLeft] = useState(timer);
-    useEffect(() => {
-        setTimeLeft(timer);
-      }, [timer]);
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timerId);
+const Countdown = () => {
+  const [timer,setTimer] = useState(0)
+
+  socket.on("roundTimer", (data) => {
+    if (data) {
+      setTimer(data.time);
+      //setMode(data.type);
     }
-  }, [timeLeft]);
-
-  const formatTime = (seconds:any) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-  };
-
+  });
   return (
-    <div>
-      <h1>Time Left: {formatTime(timeLeft)}</h1>
-    </div>
-  );
-};
+    <div>{timer}</div>
+  )
+}
 
-export default Countdown;
+export default Countdown

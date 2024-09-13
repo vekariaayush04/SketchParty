@@ -11,11 +11,13 @@
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.17.6",
+    "boring-avatars": "^1.11.1",
     "css-doodle": "^0.40.1",
     "framer-motion": "^11.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1",
+    "recoil": "^0.7.7",
     "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
