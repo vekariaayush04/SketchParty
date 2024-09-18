@@ -5,12 +5,14 @@ export default class User {
     userId : string
     userName: string;
     score: number;
+    guessed : boolean
 
     constructor(socket: Socket) {
         this.userSocket = socket;
         this.userId = socket.id
         this.score = 0;
         this.userName = "";
+        this.guessed = false
     }
 
     addUserName(username: string) {

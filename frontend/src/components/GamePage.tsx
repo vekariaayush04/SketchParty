@@ -3,10 +3,8 @@ import { socket } from "../socket";
 import Canvas from "./Canvas";
 import UserCard from "./ui/UserCard";
 import Spinner from "./ui/Spinner";
-import { ThumbsDownIcon } from "./ui/icons/thumbs-down";
-import { ThumbsUpIcon } from "./ui/icons/thumbs-up";
-import Countdown from "./ui/Countdown";
 import ChatBar from "./ui/ChatBar";
+import Header from "./ui/Header";
 
 type UserData = {
   userName: string;
@@ -31,7 +29,6 @@ export default function GamePage() {
   });
   const [isdrawingid, setIsDrawingid] = useState("");
   const [isDrawing, setIsDrawing] = useState(false);
-  const [word, setWord] = useState("");
   const [chats, setChats] = useState<ChatData[]>([]);
   const [mode, setMode] = useState("break");
   const [winner, setWinner] = useState<string | null>(null);
@@ -54,18 +51,16 @@ export default function GamePage() {
       }
     });
 
-    socket.on("word", setWord);
-    
     socket.on("round", (data) => {
       if (data) {
+        console.log(data);
         setRound(data.round);
-        setMode(data.type)
+        setMode(data.type);
       }
     });
 
-
     socket.on("gameStart", setIsGameStarted);
-    
+
     socket.on("gameEnd", (data) => {
       if (data) {
         setMode("ended");
@@ -78,12 +73,15 @@ export default function GamePage() {
         setUsers(data);
       }
     });
-
+    socket.on("newDrawer", (data) => {
+      if (data) {
+        setIsDrawing(socket.id === data);
+      }
+    });
 
     return () => {
-      socket.off("details");
       socket.off("newDrawer");
-      socket.off("word");
+      socket.off("details");
       socket.off("round");
       socket.off("roundTimer");
       socket.off("gameStart");
@@ -93,7 +91,7 @@ export default function GamePage() {
   }, []);
 
   useEffect(() => {
-    if (users.length === 3 && chats.length < 3) {
+    if (users.length === 5 && chats.length < 5) {
       const newChats: ChatData[] = users.map((user) => ({
         message: `${user.userName} joined the Room !!!`,
         type: "join",
@@ -106,33 +104,13 @@ export default function GamePage() {
 
   if (isGameStarted) {
     return (
-      <div className="max-h-screen max-w-screen box-border">
-        <div className="max-w-screen bg-gray-200 grid grid-cols-5 top-0 mx-3 mt-2 rounded-lg h-16">
-          {/* Header */}
-          <div className="flex gap-20 col-span-1 items-center">
-            <div className="ml-3 text-2xl font-bold countdown rounded-full size-10 justify-center flex items-center bg-slate-400">
-              <Countdown/>
-            </div>
-            <div className="text-lg">Round {round} of 3</div>
-          </div>
-          <div className="col-span-3 mt-2 text-center">
-            <div className="text-xs font-semibold">
-              {isDrawing ? "DRAW THIS" : "GUESS THIS"}
-            </div>
-            <div className="text-2xl">{isDrawing ? word : "_a_a_a"}</div>
-          </div>
-          <div className="flex space-x-3 col-span-1 justify-end mr-10">
-            <button className="text-green-500">
-              <ThumbsUpIcon className="w-7 h-6" />
-            </button>
-            <button className="text-red-500">
-              <ThumbsDownIcon className="w-7 h-6" />
-            </button>
-          </div>
+      <div className="max-w-screen h-screen box-border bg-gradient-to-b from-blue-800 via-blue-500 to-blue-800 flex flex-col  justify-between">
+        <div className="pt-3">
+          <Header round={round} isDrawing={isDrawing} />
         </div>
-        <div className="grid grid-cols-5">
+        <div className="md:grid md:grid-cols-5 hidden md:mb-3">
           {/* Sidebar */}
-          <div className="bg-gray-100 p-4 col-span-1 mt-5 ml-3 rounded-lg border-2 h-[550px]">
+          <div className="border p-4 col-span-1 mt-5 ml-3 rounded-lg  h-[550px] backdrop-blur-lg bg-sky-300/30">
             <div className="mt-4 space-y-2">
               {users.map((player, index) => (
                 <UserCard
@@ -147,17 +125,60 @@ export default function GamePage() {
             </div>
           </div>
           {/* Main canvas */}
-          <div className="bg-white col-span-3">
+          <div className="col-span-3 flex items-center justify-center">
             {mode === "running" ? (
               <Canvas isdrawing={isDrawing} />
             ) : (
               <div>Game will start soon ...</div>
             )}
-            {mode === "ended" && <div>Winner is {winner}</div>}
+            <div>{winner}</div>
           </div>
-          {chats.length === 3 && (
-            <ChatBar username={user.userName} chatProps={chats} isDrawingProps={isDrawing}/>
+
+          {chats.length === 5 && (
+            <ChatBar
+              username={user.userName}
+              chatProps={chats}
+              isDrawingProps={isDrawing}
+            />
           )}
+        </div>
+        <div className="md:hidden flex flex-col justify-center items-center">
+          {/* Main canvas */}
+          <div className="col-span-3 flex items-center justify-center h-[440px]">
+            {mode === "running" ? (
+              <Canvas isdrawing={isDrawing} />
+            ) : (
+              <div className=" flex justify-center items-center">Game will start soon ...</div>
+            )}
+            <div>{winner}</div>
+          </div>
+          {/* Sidebar */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="border col-span-1 mt-5  rounded-lg  backdrop-blur-lg bg-sky-300/30">
+              <div className="mt-4 space-y-2 overflow-auto p-4 ">
+                {users.map((player, index) => (
+                  <UserCard
+                    key={player.userId}
+                    index={index}
+                    name={player.userName}
+                    points={player.score}
+                    isDrawingId={isdrawingid}
+                    userId={player.userId}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="col-span-1 flex justify-center flex-grow">
+            {chats.length === 5 && (
+              <ChatBar
+                username={user.userName}
+                chatProps={chats}
+                isDrawingProps={isDrawing}
+              />
+            )}
+            </div>
+          </div>
         </div>
       </div>
     );

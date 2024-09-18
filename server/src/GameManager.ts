@@ -65,7 +65,7 @@ export default class GameManager {
 
         this.pendingGame.addPlayer(user);
 
-        if (this.pendingGame.players.length >= 3) {
+        if (this.pendingGame.players.length >= 5) {
             this.startGame(this.pendingGame);
             this.pendingGame = null; 
         }

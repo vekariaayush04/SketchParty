@@ -121,15 +121,15 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
   }
 
   return (
-    <div className="flex flex-col items-center  p-4 mt-4">
+    <div className="rounded-lg mt-5">
       <canvas
         ref={canvasRef}
         width={500}
         height={500}
-        className="border border-gray-300 rounded-lg"
+        className="border border-gray-300 rounded-lg w-80 h-80 md:w-[500px] md:h-[500px]"
       />
       {isdrawing && (
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 justify-center pt-5">
         <input
           type="color"
           value={color}

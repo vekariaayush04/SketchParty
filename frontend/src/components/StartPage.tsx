@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { socket } from "../socket";
-import { useNavigate } from "react-router-dom";
 import bg from "./../assets/bgg.png";
 import mobilebg from "./../assets/bgg mobile1.jpg";
 import tablet from "./../assets/bgg mobile.jpg";
@@ -9,7 +8,6 @@ import GamePage from "./GamePage";
 // import { generateColors } from "../util/colorGenerator";
 
 const StartPage = () => {
-  const navigate = useNavigate();
   const [playerName, setPlayerName] = useState("");
   const [isPlayed,setIsPlayed] = useState(false)
 
@@ -23,7 +21,7 @@ const StartPage = () => {
 
     console.log("Game started with player:", playerName);
     setIsPlayed(true)
-    navigate("/game");
+    //navigate("/game");
   };
 
   if(isPlayed){
@@ -61,7 +59,7 @@ const StartPage = () => {
             placeholder="Enter your name"
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
-            className="p-2 sm:p-3 mb-3 sm:mb-4 text-base sm:text-lg rounded-md border text-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center"
+            className="p-2 sm:p-3 mb-3 sm:mb-4 text-base sm:text-lg rounded-md border text-black border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center"
           />
           <button
             type="submit"
@@ -71,7 +69,7 @@ const StartPage = () => {
           </button>
           <button
             type="button"
-            className="w-full p-2 sm:p-3 text-sm sm:text-lg text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
+            className="w-full p-2 sm:p-3 text-sm sm:text-lg text-gray-700 bg-blue-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
           >
             Create Room
           </button>

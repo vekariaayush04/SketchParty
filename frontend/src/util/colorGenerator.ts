@@ -1,4 +1,4 @@
-const generateColor =  (num : number): string => {
+export const generateColor =  (num : number): string => {
     const str = "abcdef1234567890"
     let color = "#"
 

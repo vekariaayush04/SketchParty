@@ -89,7 +89,7 @@ const ChatBar = ({
   };
 
   return (
-    <div className="w-[250px] bg-gray-100 p-4 flex flex-col col-span-1 mt-5 rounded-lg h-[550px] justify-end">
+    <div className="w-[250px] border p-4 flex flex-col  mt-5 rounded-lg  justify-end md:h-[550px] h-96 backdrop-blur-lg bg-sky-300/30">
       <div className="overflow-y-auto space-y-2">
         {chats.map((chat, index) => (
           <ChatMessage key={index} index={index} type={chat.type} message={chat.message} />
@@ -97,7 +97,7 @@ const ChatBar = ({
         <div ref={messageEndRef} />
       </div>
       {!isDrawingProps && (
-        <form className="mt-4 flex border-2" onSubmit={sendMessage}>
+        <form className="mt-4 flex " onSubmit={sendMessage}>
           <input
             type="text"
             placeholder="Type your guess here..."
