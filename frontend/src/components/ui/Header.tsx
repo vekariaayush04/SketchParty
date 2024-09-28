@@ -25,16 +25,16 @@ const Header = ({round , isDrawing} : {
     <div className="max-w-screen grid grid-cols-5 mx-3 rounded-lg h-16 border backdrop-blur-lg bg-sky-300/30">
           {/* Header */}
           <div className="flex md:gap-20 gap-10 col-span-1 items-center">
-            <div className="ml-5 md:ml-3 text-2xl font-bold countdown rounded-full size-10 justify-center flex items-center md:bg-gray-300">
+            <div className="ml-5 md:ml-3 text-2xl font-bold countdown rounded-full size-10 justify-center flex items-center text-white ">
               <Countdown/>
             </div>
-            <div className="md:text-lg bg-gray-300 md:h-10 flex items-center justify-center md:px-2 rounded-xl text-xs px-3">Round {round} of 3</div>
+            <div className="md:text-lg text-white md:h-10 flex items-center justify-center md:px-2 rounded-xl text-xs px-3">Round {round} of 3</div>
           </div>
           <div className="col-span-3 mt-2 text-center">
-            <div className="text-xs font-semibold">
+            <div className="text-xs font-semibold text-white">
               {isDrawing ? "DRAW THIS" : "GUESS THIS"}
             </div>
-            <div className="text-2xl">{isDrawing ? word : "_a_a_a"}</div>
+            <div className="text-2xl text-white">{isDrawing ? word : "_a_a_a"}</div>
           </div>
           <div className="flex space-x-3 col-span-1 justify-end mr-10">
             <button className="text-green-500">

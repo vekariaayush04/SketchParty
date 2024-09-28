@@ -148,9 +148,9 @@ export default function GamePage() {
             {mode === "running" ? (
               <Canvas isdrawing={isDrawing} />
             ) : (
-              <div className=" flex justify-center items-center">Game will start soon ...</div>
+              <div className=" flex justify-center items-center text-white">Game will start soon ...</div>
             )}
-            <div>{winner}</div>
+            <div className="text-white">{winner}</div>
           </div>
           {/* Sidebar */}
           <div className="grid grid-cols-2 gap-2">

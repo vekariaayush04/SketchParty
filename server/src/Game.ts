@@ -4,6 +4,7 @@ import { Chat, DrawingEvent, UserData } from "./types/types";
 import { generateWords } from "./utils/Words";
 
 export default class Game {
+  gameId: number
   players: User[];
   private currentDrawerIndex: number;
   private words: string[];
@@ -13,6 +14,8 @@ export default class Game {
   private roundTime: number;
   private gameStarted: boolean;
   private chatData: Chat[];
+  private correctguesses : number
+  private currenTimer : number
 
   constructor(roundTime: number = 20) {
     this.players = [];
@@ -24,6 +27,9 @@ export default class Game {
     this.gameStarted = false;
     this.chatData = [];
     this.turn = 0;
+    this.gameId = Math.random()
+    this.correctguesses = 0;
+    this.currenTimer = 20;
   }
 
   addPlayer(player: User) {
@@ -126,9 +132,15 @@ export default class Game {
     currentDrawer.userSocket.emit("word", this.currentWord);
   }
 
+  // async cacheData(){
+  //     const gameId = `game:${this.gameId}`;
+  //     const data = JSON.stringify(this.toJSON())
+  //     await client.set(gameId,data)
+  // }
+
   private startRoundTimer() {
     let counter: number = this.roundTime;
-
+    
     this.players.forEach((player) => {
       player.userSocket.emit("round", {
         round: this.round,
@@ -146,6 +158,8 @@ export default class Game {
       });
 
       counter--;
+      this.currenTimer = counter
+      //this.cacheData()
 
       if (counter < 0) {
         clearInterval(intervalId);
@@ -168,11 +182,15 @@ export default class Game {
     });
   }
 
-  handleGuess(player: User, message: any) {
+  handleGuess(player: User, message: any ) {
     if (message.message.toLowerCase() === this.currentWord.toLowerCase() && !player.guessed) {
       //let score = 100;
+      const remainingTime = this.currenTimer
       let score = player.score;
-      player.updateScore(score + 100);
+      const pointsForGuessing = Math.floor(remainingTime * 10); // Example: 10 points per second left
+      player.updateScore(score + pointsForGuessing);
+      this.correctguesses++;
+
       player.guessed = true;
       this.players.forEach((p) => {
         p.userSocket.emit("correctGuess", {
@@ -211,6 +229,7 @@ export default class Game {
       });
 
       buffer--;
+      //this.cacheData()
 
       if (buffer < 0) {
         this.updateScores();
@@ -264,4 +283,23 @@ export default class Game {
     //todo : add logic
     return null;
   }
+
+//   toJSON() {
+//     return {
+//       players: this.players.map(player => ({
+//         userId: player.userId,
+//         userName: player.userName,
+//         score: player.score,
+//         // Do not include socket or circular references
+//       })),
+//       gameId : this.gameId,
+//       currentDrawerIndex: this.currentDrawerIndex,
+//       currentWord: this.currentWord,
+//       round: this.round,
+//       turn: this.turn,
+//       roundTime: this.roundTime,
+//       gameStarted: this.gameStarted,
+//       chatData: this.chatData,
+//     };
+//   }
 }

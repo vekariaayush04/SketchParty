@@ -34,6 +34,6 @@ io.on("connection", (socket) => {
     });
 });
 
-server.listen(3000, () => {
-    console.log("server on 3k");
+server.listen(8080, () => {
+    console.log("server on 8080");
 });

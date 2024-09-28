@@ -20,6 +20,8 @@ export default class GameManager {
         this.handleMessage(user);
     }
 
+    
+
     removeUser(socket: Socket) {
         const leavingUser = this.users.find(user => user.userSocket === socket);
         this.users = this.users.filter(user => user.userSocket !== socket);
@@ -74,6 +76,11 @@ export default class GameManager {
 
     startGame(game: Game) {
         this.games.push(game);
+        //const gameId = `game:${game.gameId}`;
+        //const data = JSON.stringify(game.toJSON())
+        //await client.set(gameId,data)
+        //console.log(game);
+        
         game.start();
     }
 

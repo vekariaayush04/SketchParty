@@ -4,8 +4,7 @@ import bg from "./../assets/bgg.png";
 import mobilebg from "./../assets/bgg mobile1.jpg";
 import tablet from "./../assets/bgg mobile.jpg";
 import GamePage from "./GamePage";
-// import Avatar from "boring-avatars";
-// import { generateColors } from "../util/colorGenerator";
+
 
 const StartPage = () => {
   const [playerName, setPlayerName] = useState("");
@@ -21,7 +20,6 @@ const StartPage = () => {
 
     console.log("Game started with player:", playerName);
     setIsPlayed(true)
-    //navigate("/game");
   };
 
   if(isPlayed){
