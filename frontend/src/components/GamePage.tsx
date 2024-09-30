@@ -104,7 +104,7 @@ export default function GamePage() {
 
   if (isGameStarted) {
     return (
-      <div className="max-w-screen md:h-screen box-border bg-gradient-to-b from-blue-800 via-blue-500 to-blue-800 flex flex-col  justify-between">
+      <div className="w-screen h-screen box-border bg-gradient-to-b from-blue-800 via-blue-500 to-blue-800 flex flex-col overflow-hidden ">
         <div className="pt-3">
           <Header round={round} isDrawing={isDrawing} />
         </div>
@@ -142,7 +142,7 @@ export default function GamePage() {
             />
           )}
         </div>
-        <div className="md:hidden flex flex-col justify-center items-center">
+        <div className="md:hidden flex flex-col justify-center items-center pb-4 px-3">
           {/* Main canvas */}
           <div className="col-span-3 flex items-center justify-center h-[440px]">
             {mode === "running" ? (
@@ -153,8 +153,8 @@ export default function GamePage() {
             <div className="text-white">{winner}</div>
           </div>
           {/* Sidebar */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="border col-span-1 mt-5  rounded-lg  backdrop-blur-lg bg-sky-300/30">
+          <div className="grid grid-cols-2 gap-2 bottom-0 absolute pb-4 px-4">
+            <div className="border col-span-1  rounded-lg  backdrop-blur-lg bg-sky-300/30">
               <div className="mt-4 space-y-2 overflow-auto p-4 ">
                 {users.map((player, index) => (
                   <UserCard
