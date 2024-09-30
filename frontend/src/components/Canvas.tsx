@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { socket } from '../socket'
 
 type DrawingEvent = {
-  Drawingtype: 'start' | 'draw' | 'end' | 'clear'
+  type: 'start' | 'draw' | 'end' | 'clear'
   x: number
   y: number
   color: string
@@ -11,23 +11,40 @@ type DrawingEvent = {
 export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
-  const [isVisualMode, setIsVisualMode] = useState(!isdrawing)
   const [color, setColor] = useState('#000000')
 
   useEffect(() => {
-    setIsVisualMode(!isdrawing)
-    clearCanvas()
-  }, [isdrawing])
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-  useEffect(() => {
-    const handleRemoteDrawing = (data: DrawingEvent) => {
-      draw(data)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.lineWidth = 2
+
+    const handleDrawEvent = (event: DrawingEvent) => {
+      switch (event.type) {
+        case 'start':
+          ctx.beginPath()
+          ctx.moveTo(event.x, event.y)
+          break
+        case 'draw':
+          ctx.lineTo(event.x, event.y)
+          ctx.strokeStyle = event.color
+          ctx.stroke()
+          break
+        case 'clear':
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          break
+      }
     }
-    
-    socket.on('drawEvent', handleRemoteDrawing)
+
+    socket.on('drawEvent', handleDrawEvent)
 
     return () => {
-      socket.off('drawEvent', handleRemoteDrawing)
+      socket.off('drawEvent', handleDrawEvent)
     }
   }, [])
 
@@ -35,72 +52,53 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const handleMouseDown = (e: MouseEvent) => {
-      if (isVisualMode) return
+    const rect = canvas.getBoundingClientRect()
+
+    const handleStart = (e: MouseEvent | TouchEvent) => {
+      if (!isdrawing) return
       setIsDrawing(true)
-      const { offsetX, offsetY } = e
-      drawAndEmit('start', offsetX, offsetY, color)
+      const { clientX, clientY } = 'touches' in e ? e.touches[0] : e
+      const x = clientX - rect.left
+      const y = clientY - rect.top
+      emitDrawEvent('start', x, y)
     }
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDrawing || isVisualMode) return
-      const { offsetX, offsetY } = e
-      drawAndEmit('draw', offsetX, offsetY, color)
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      if (!isDrawing || !isdrawing) return
+      const { clientX, clientY } = 'touches' in e ? e.touches[0] : e
+      const x = clientX - rect.left
+      const y = clientY - rect.top
+      emitDrawEvent('draw', x, y)
     }
 
-    const handleMouseUp = () => {
-      if (isVisualMode) return
+    const handleEnd = () => {
+      if (!isdrawing) return
       setIsDrawing(false)
-      drawAndEmit('end', 0, 0, color)
+      emitDrawEvent('end', 0, 0)
     }
 
-    canvas.addEventListener('mousedown', handleMouseDown)
-    canvas.addEventListener('mousemove', handleMouseMove)
-    canvas.addEventListener('mouseup', handleMouseUp)
+    canvas.addEventListener('mousedown', handleStart)
+    canvas.addEventListener('mousemove', handleMove)
+    canvas.addEventListener('mouseup', handleEnd)
+    canvas.addEventListener('mouseout', handleEnd)
+    canvas.addEventListener('touchstart', handleStart)
+    canvas.addEventListener('touchmove', handleMove)
+    canvas.addEventListener('touchend', handleEnd)
 
     return () => {
-      canvas.removeEventListener('mousedown', handleMouseDown)
-      canvas.removeEventListener('mousemove', handleMouseMove)
-      canvas.removeEventListener('mouseup', handleMouseUp)
+      canvas.removeEventListener('mousedown', handleStart)
+      canvas.removeEventListener('mousemove', handleMove)
+      canvas.removeEventListener('mouseup', handleEnd)
+      canvas.removeEventListener('mouseout', handleEnd)
+      canvas.removeEventListener('touchstart', handleStart)
+      canvas.removeEventListener('touchmove', handleMove)
+      canvas.removeEventListener('touchend', handleEnd)
     }
-  }, [isDrawing, isVisualMode, color])
+  }, [isdrawing, isDrawing])
 
-  const drawAndEmit = (Drawingtype: DrawingEvent['Drawingtype'], x: number, y: number, color: string) => {
-    const event: DrawingEvent = { Drawingtype, x, y, color }
-    draw(event)
-    if (socket) {
-      socket.emit('message', {
-        type: 'drawEvent',
-        event: event,
-      })
-    }
-  }
-
-  const draw = (event: DrawingEvent) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    ctx.strokeStyle = event.color
-
-    switch (event.Drawingtype) {
-      case 'start':
-        ctx.beginPath()
-        ctx.moveTo(event.x, event.y)
-        break
-      case 'draw':
-        ctx.lineTo(event.x, event.y)
-        ctx.stroke()
-        break
-      case 'end':
-        ctx.closePath()
-        break
-      case 'clear':
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        break
-    }
+  const emitDrawEvent = (type: DrawingEvent['type'], x: number, y: number) => {
+    const event: DrawingEvent = { type, x, y, color };
+    socket.emit('drawEvent', event);  // Make sure this matches the server listener
   }
 
   const clearCanvas = () => {
@@ -111,13 +109,7 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
     if (!ctx) return
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    if (socket) {
-      socket.emit('message', {
-        type: 'drawEvent',
-        event: { Drawingtype: 'clear', x: 0, y: 0, color: '' },
-      })
-    }
+    emitDrawEvent('clear', 0, 0)
   }
 
   return (
@@ -130,14 +122,14 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
       />
       {isdrawing && (
         <div className="flex items-center space-x-4 justify-center pt-5">
-        <input
-          type="color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-          className="w-10 h-10 rounded-full"
-        />
-        <button onClick={clearCanvas}>Clear Canvas</button>
-      </div>
+          <input
+            type="color"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            className="w-10 h-10 rounded-full"
+          />
+          <button onClick={clearCanvas} className="px-4 py-2 bg-red-500 text-white rounded">Clear Canvas</button>
+        </div>
       )}
     </div>
   )

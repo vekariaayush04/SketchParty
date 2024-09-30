@@ -104,7 +104,7 @@ export default function GamePage() {
 
   if (isGameStarted) {
     return (
-      <div className="max-w-screen h-screen box-border bg-gradient-to-b from-blue-800 via-blue-500 to-blue-800 flex flex-col  justify-between">
+      <div className="max-w-screen md:h-screen box-border bg-gradient-to-b from-blue-800 via-blue-500 to-blue-800 flex flex-col  justify-between">
         <div className="pt-3">
           <Header round={round} isDrawing={isDrawing} />
         </div>

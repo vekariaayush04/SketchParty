@@ -177,6 +177,7 @@ export default class Game {
   }
 
   handleDrawingEvent(event: DrawingEvent) {
+    // Broadcast the drawing event to all players
     this.players.forEach((player) => {
       player.userSocket.emit("drawEvent", event);
     });

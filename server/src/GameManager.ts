@@ -2,6 +2,7 @@ import { Socket } from "socket.io";
 import Game from "./Game";
 import User from "./User";
 import { DRAW, GUESS, INIT_GAME } from "./message";
+import { DrawingEvent } from "./types/types"; 
 
 export default class GameManager {
     private games: Game[];
@@ -97,17 +98,22 @@ export default class GameManager {
 
             if (message.type === GUESS) {
                 const game = this.games.find((game) => game.hasPlayer(user))
-                // game?.addMessage({
-                //     userId : message.userId,
-                //     message : message.message,
-                //     type : message.chatType
-                // })
-                game?.handleGuess(user,message)
+                game?.handleGuess(user, message)
             }
 
             if (message.type === DRAW) {
                 const game = this.games.find((game) => game.hasPlayer(user))
                 game?.handleDrawingEvent(message.event)
+            }
+        });
+
+        // Update this listener to use the Game's handleDrawingEvent method
+        user.userSocket.on("drawEvent", (event: DrawingEvent) => {
+            const game = this.games.find((game) => game.hasPlayer(user))
+            if (game) {
+                game.handleDrawingEvent(event);
+            } else {
+                console.log("User not in an active game");
             }
         });
     }

@@ -13,8 +13,8 @@ export type UserData = {
 }
 
 export type DrawingEvent = {
-    Drawingtype: 'start' | 'draw' | 'end' | "clear"
+    type: 'start' | 'draw' | 'end' | 'clear'
     x: number
     y: number
     color: string
-  }
+}
