@@ -133,10 +133,12 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
   }
 
   return (
-    <div ref={containerRef} className="w-full h-full flex flex-col p-4">
+    <div ref={containerRef} className={isdrawing  ? `flex flex-col p-4 justify-between h-[80%]` : `flex flex-col p-4 justify-center h-full`}>
       <canvas
         ref={canvasRef}
-        className="border border-gray-300 rounded-lg w-full h-full"
+        height={400}
+        width={500}
+        className="border border-gray-300 rounded-lg"
       />
 
       {/* Render different components based on `isdrawing` */}
@@ -158,5 +160,6 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
         </div>
       )}
     </div>
+    
   )
 }

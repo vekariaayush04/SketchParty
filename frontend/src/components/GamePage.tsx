@@ -5,6 +5,7 @@ import UserCard from "./ui/UserCard";
 import Spinner from "./ui/Spinner";
 import ChatBar from "./ui/ChatBar";
 import Header from "./ui/Header";
+import { div } from "framer-motion/client";
 
 type UserData = {
   userName: string;
@@ -104,69 +105,70 @@ export default function GamePage() {
 
   if (isGameStarted) {
     return (
-      <div className="overflow-hiddenw-screen h-screen box-border bg-gradient-to-b from-blue-800 via-blue-500 to-blue-800">
+      <div className="overflow-hidden w-screen h-screen box-border bg-gradient-to-b from-blue-800 via-blue-500 to-blue-800">
         {/* desktop */}
         <div>
-        <div className="pt-3 hidden md:block">
-          <Header round={round} isDrawing={isDrawing} />
-        </div>
-        <div className="md:grid md:grid-cols-5 hidden md:mb-3 gap-3">
-        
-          {/* Sidebar */}
-          <div className="border p-4 col-span-1 mt-5 ml-3 rounded-lg  h-[550px] backdrop-blur-lg bg-sky-300/30">
-            <div className="mt-4 space-y-2">
-              {users.map((player, index) => (
-                <UserCard
-                  key={player.userId}
-                  index={index}
-                  name={player.userName}
-                  points={player.score}
-                  isDrawingId={isdrawingid}
-                  userId={player.userId}
-                />
-              ))}
+          <div className="pt-3 hidden md:block">
+            <Header round={round} isDrawing={isDrawing} />
+          </div>
+          <div className="md:grid md:grid-cols-5 hidden md:mb-3 gap-3">
+            {/* Sidebar */}
+            <div className="border p-4 col-span-1 mt-5 ml-3 rounded-lg h-[550px] backdrop-blur-lg bg-sky-300/30">
+              <div className="mt-4 space-y-2">
+                {users.map((player, index) => (
+                  <UserCard
+                    key={player.userId}
+                    index={index}
+                    name={player.userName}
+                    points={player.score}
+                    isDrawingId={isdrawingid}
+                    userId={player.userId}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-          {/* Main canvas */}
-          <div className="col-span-3 overflow-hidden">
-          <div className=" flex items-center justify-center">
-            {mode === "running" ? (
-              <Canvas isdrawing={isDrawing} />
-            ) : (
-              <div>Game will start soon ...</div>
-            )}
-            <div>{winner}</div>
-          </div>
-          </div>
+            {/* Main canvas */}
+            <div className="col-span-3 box-border">
+              <div className="h-[80%] fixed mt-10 ml-20">
+                {mode === "running" ? (
+                  <Canvas isdrawing={isDrawing} />
+                ) : (
+                  <div>Game will start soon ...</div>
+                )}
+                <div>{winner}</div>
+              </div>
+            </div>
 
-          {chats.length === 5 && (
-            <ChatBar
-              username={user.userName}
-              chatProps={chats}
-              isDrawingProps={isDrawing}
-            />
-          )}
-        </div>
+            {chats.length === 5 && (
+              <ChatBar
+                username={user.userName}
+                chatProps={chats}
+                isDrawingProps={isDrawing}
+              />
+            )}
+          </div>
         </div>
         {/* mobile */}
         <div className="md:hidden h-screen grid grid-rows-10">
           {/* header */}
-        <div className="row-span-1">
-          <Header round={round} isDrawing={isDrawing} />
-        </div>
+          <div className="row-span-1">
+            <Header round={round} isDrawing={isDrawing} />
+          </div>
           {/* Main canvas */}
-          <div className="row-span-5 flex items-center justify-center box-border  h-[80%]">
+          <div className="row-span-5 flex items-center justify-center box-border overflow-hidden">
             {mode === "running" ? (
-              <Canvas isdrawing={isDrawing} />
+              <div className="w-full h-full">
+                <Canvas isdrawing={isDrawing} />
+              </div>
             ) : (
-              <div className=" flex justify-center items-center text-white">Game will start soon ...</div>
+              <div className="flex justify-center items-center text-white">Game will start soon ...</div>
             )}
             <div className="text-white">{winner}</div>
           </div>
           {/* Sidebar */}
           <div className="grid grid-cols-2 gap-2 row-span-4 p-4">
-            <div className="border col-span-1  rounded-lg  backdrop-blur-lg bg-sky-300/30">
-              <div className="mt-4 space-y-2 overflow-auto p-4 ">
+            <div className="border col-span-1 rounded-lg backdrop-blur-lg bg-sky-300/30">
+              <div className="mt-4 space-y-2 overflow-auto p-4">
                 {users.map((player, index) => (
                   <UserCard
                     key={player.userId}
@@ -181,13 +183,13 @@ export default function GamePage() {
             </div>
 
             <div className="col-span-1 flex justify-center flex-grow">
-            {chats.length === 5 && (
-              <ChatBar
-                username={user.userName}
-                chatProps={chats}
-                isDrawingProps={isDrawing}
-              />
-            )}
+              {chats.length === 5 && (
+                <ChatBar
+                  username={user.userName}
+                  chatProps={chats}
+                  isDrawingProps={isDrawing}
+                />
+              )}
             </div>
           </div>
         </div>
