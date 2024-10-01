@@ -10,8 +10,28 @@ type DrawingEvent = {
 
 export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [color, setColor] = useState('#000000')
+
+  useEffect(() => {
+    const resizeCanvas = () => {
+      const canvas = canvasRef.current
+      const container = containerRef.current
+      if (!canvas || !container) return
+
+      const { width, height } = container.getBoundingClientRect()
+      canvas.width = width
+      canvas.height = height
+    }
+
+    resizeCanvas()
+    window.addEventListener('resize', resizeCanvas)
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas)
+    }
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -52,12 +72,11 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const rect = canvas.getBoundingClientRect()
-
     const handleStart = (e: MouseEvent | TouchEvent) => {
       if (!isdrawing) return
       setIsDrawing(true)
       const { clientX, clientY } = 'touches' in e ? e.touches[0] : e
+      const rect = canvas.getBoundingClientRect()
       const x = clientX - rect.left
       const y = clientY - rect.top
       emitDrawEvent('start', x, y)
@@ -66,6 +85,7 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
     const handleMove = (e: MouseEvent | TouchEvent) => {
       if (!isDrawing || !isdrawing) return
       const { clientX, clientY } = 'touches' in e ? e.touches[0] : e
+      const rect = canvas.getBoundingClientRect()
       const x = clientX - rect.left
       const y = clientY - rect.top
       emitDrawEvent('draw', x, y)
@@ -97,8 +117,8 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
   }, [isdrawing, isDrawing])
 
   const emitDrawEvent = (type: DrawingEvent['type'], x: number, y: number) => {
-    const event: DrawingEvent = { type, x, y, color };
-    socket.emit('drawEvent', event);  // Make sure this matches the server listener
+    const event: DrawingEvent = { type, x, y, color }
+    socket.emit('drawEvent', event)
   }
 
   const clearCanvas = () => {
@@ -113,22 +133,28 @@ export default function Canvas({ isdrawing }: { isdrawing: boolean }) {
   }
 
   return (
-    <div className="rounded-lg mt-5">
+    <div ref={containerRef} className="w-full h-full flex flex-col p-4">
       <canvas
         ref={canvasRef}
-        width={500}
-        height={500}
-        className="border border-gray-300 rounded-lg w-80 h-80 md:w-[500px] md:h-[500px]"
+        className="border border-gray-300 rounded-lg w-full h-full"
       />
-      {isdrawing && (
-        <div className="flex items-center space-x-4 justify-center pt-5">
+
+      {/* Render different components based on `isdrawing` */}
+      {isdrawing ? (
+        <div className="flex flex-wrap items-center space-x-4 justify-center pt-2">
           <input
             type="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
             className="w-10 h-10 rounded-full"
           />
-          <button onClick={clearCanvas} className="px-4 py-2 bg-red-500 text-white rounded">Clear Canvas</button>
+          <button onClick={clearCanvas} className="px-4 py-2 bg-red-500 text-white rounded">
+            Clear Canvas
+          </button>
+        </div>
+      ) : (
+        <div className="text-center mt-2">
+          <p className="text-gray-500">Drawing is disabled</p>
         </div>
       )}
     </div>

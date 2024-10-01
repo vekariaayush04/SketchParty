@@ -89,7 +89,7 @@ const ChatBar = ({
   };
 
   return (
-    <div className="w-[250px] border p-4 flex flex-col  rounded-lg  justify-end md:h-[550px] h-80 backdrop-blur-lg bg-sky-300/30 md:mt-4">
+    <div className="border p-4 flex flex-col  rounded-lg  justify-end md:h-[550px] backdrop-blur-lg bg-sky-300/30 md:mt-4 md:mr-4">
       <div className="overflow-y-auto space-y-2">
         {chats.map((chat, index) => (
           <ChatMessage key={index} index={index} type={chat.type} message={chat.message} />

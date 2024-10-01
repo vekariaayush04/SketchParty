@@ -22,7 +22,7 @@ const Header = ({round , isDrawing} : {
         }
     })
   return (
-    <div className="max-w-screen grid grid-cols-5 mx-3 rounded-lg h-16 border backdrop-blur-lg bg-sky-300/30">
+    <div className="max-w-screen grid grid-cols-5 mx-3 rounded-lg md:h-16 border backdrop-blur-lg bg-sky-300/30">
           {/* Header */}
           <div className="flex md:gap-20 gap-10 col-span-1 items-center">
             <div className="ml-5 md:ml-3 text-2xl font-bold countdown rounded-full size-10 justify-center flex items-center text-white ">

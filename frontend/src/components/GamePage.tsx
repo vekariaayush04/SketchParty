@@ -104,11 +104,14 @@ export default function GamePage() {
 
   if (isGameStarted) {
     return (
-      <div className="w-screen h-screen box-border bg-gradient-to-b from-blue-800 via-blue-500 to-blue-800 flex flex-col overflow-hidden ">
-        <div className="pt-3">
+      <div className="overflow-hiddenw-screen h-screen box-border bg-gradient-to-b from-blue-800 via-blue-500 to-blue-800">
+        {/* desktop */}
+        <div>
+        <div className="pt-3 hidden md:block">
           <Header round={round} isDrawing={isDrawing} />
         </div>
-        <div className="md:grid md:grid-cols-5 hidden md:mb-3">
+        <div className="md:grid md:grid-cols-5 hidden md:mb-3 gap-3">
+        
           {/* Sidebar */}
           <div className="border p-4 col-span-1 mt-5 ml-3 rounded-lg  h-[550px] backdrop-blur-lg bg-sky-300/30">
             <div className="mt-4 space-y-2">
@@ -125,13 +128,15 @@ export default function GamePage() {
             </div>
           </div>
           {/* Main canvas */}
-          <div className="col-span-3 flex items-center justify-center">
+          <div className="col-span-3 overflow-hidden">
+          <div className=" flex items-center justify-center">
             {mode === "running" ? (
               <Canvas isdrawing={isDrawing} />
             ) : (
               <div>Game will start soon ...</div>
             )}
             <div>{winner}</div>
+          </div>
           </div>
 
           {chats.length === 5 && (
@@ -142,9 +147,15 @@ export default function GamePage() {
             />
           )}
         </div>
-        <div className="md:hidden flex flex-col justify-center items-center pb-4 px-3">
+        </div>
+        {/* mobile */}
+        <div className="md:hidden h-screen grid grid-rows-10">
+          {/* header */}
+        <div className="row-span-1">
+          <Header round={round} isDrawing={isDrawing} />
+        </div>
           {/* Main canvas */}
-          <div className="col-span-3 flex items-center justify-center h-[440px]">
+          <div className="row-span-5 flex items-center justify-center box-border  h-[80%]">
             {mode === "running" ? (
               <Canvas isdrawing={isDrawing} />
             ) : (
@@ -153,7 +164,7 @@ export default function GamePage() {
             <div className="text-white">{winner}</div>
           </div>
           {/* Sidebar */}
-          <div className="grid grid-cols-2 gap-2 bottom-0 absolute pb-4 px-4">
+          <div className="grid grid-cols-2 gap-2 row-span-4 p-4">
             <div className="border col-span-1  rounded-lg  backdrop-blur-lg bg-sky-300/30">
               <div className="mt-4 space-y-2 overflow-auto p-4 ">
                 {users.map((player, index) => (
